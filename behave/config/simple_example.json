@@ -1,0 +1,130 @@
+{
+  "id": "00",
+  "title": "A behavior tree",
+  "description": "",
+  "root": "01",
+  "properties": {},
+  "nodes": {
+    "01": {
+      "id": "01",
+      "name": "Sequence",
+      "title": "PARENT_SEQUENCE",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -300,
+        "y": 12
+      },
+      "children": [
+        "02",
+        "03"
+      ]
+    },
+    "02": {
+      "id": "02",
+      "name": "Priority",
+      "title": "SELECTOR",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -96,
+        "y": -120
+      },
+      "children": [
+        "04",
+        "05",
+        "06"
+      ]
+    },
+    "03": {
+      "id": "03",
+      "name": "Sequence",
+      "title": "CHILD_SEQUENCE",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -96,
+        "y": 144
+      },
+      "children": [
+        "07",
+        "08",
+        "09"
+      ]
+    },
+    "04": {
+      "id": "04",
+      "name": "Succeeder",
+      "title": "ACTION_01",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 120,
+        "y": -216
+      }
+    },
+    "05": {
+      "id": "05",
+      "name": "Runner",
+      "title": "ACTION_02",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 120,
+        "y": -120
+      }
+    },
+    "06": {
+      "id": "06",
+      "name": "Failer",
+      "title": "ACTION_03",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 120,
+        "y": -36
+      }
+    },
+    "07": {
+      "id": "07",
+      "name": "Succeeder",
+      "title": "ACTION_04",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 120,
+        "y": 48
+      }
+    },
+    "08": {
+      "id": "08",
+      "name": "Runner",
+      "title": "ACTION_05",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 120,
+        "y": 144
+      }
+    },
+    "09": {
+      "id": "09",
+      "name": "Failer",
+      "title": "ACTION_06",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 120,
+        "y": 228
+      }
+    }
+  },
+  "display": {
+    "camera_x": 932.5,
+    "camera_y": 483,
+    "camera_z": 1,
+    "x": -504,
+    "y": 12
+  },
+  "custom_nodes": []
+}
