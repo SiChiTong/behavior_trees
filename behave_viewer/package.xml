@@ -14,6 +14,7 @@
   <buildtool_depend>catkin</buildtool_depend>
   
   <run_depend>python-matplotlib</run_depend>
+  <run_depend>python-pygraphviz</run_depend>
   <run_depend>rqt_gui</run_depend>
   
   <export>

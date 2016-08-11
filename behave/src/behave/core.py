@@ -40,9 +40,10 @@ class BehaviorTree(Action):
     identifier = identifier or str(uuid.uuid1())
     super(BehaviorTree, self).__init__(identifier, label, properties=properties)
     self.category = 'BehaviorTree'
-    self.graph = nx.Graph()
+    self.graph = nx.DiGraph()
     self.logger = logger
     self.nodes = dict()
+    self.children = collections.defaultdict(list)
   
   def _get_node_class(self, name):
     split = name.rsplit('.', 1)
@@ -65,64 +66,55 @@ class BehaviorTree(Action):
       self.logger.logdebug('Dict does not have the expected keys')
       return False
     # Create a graph and check that it's a tree
-    graph = nx.Graph()
+    graph = nx.DiGraph()
     nodes = dict()
     blacklist = []
     # Process the nodes
     for identifier, spec in data['nodes'].items():
       # Get the children of the current node
-      children = []
       if spec.has_key('child'):
-        children.append(spec['child'])
+        self.children[identifier].append(spec['child'])
       elif spec.has_key('children'):
-        children = spec['children']
+        self.children[identifier] = spec['children']
       # Check spec has the expected fields
       if not criros.utils.has_keys(spec, ['id','name','properties','title']):
         self.logger.logdebug( 'Node [{0}] does not have the expected keys'.format(identifier) )
-        blacklist += children
+        blacklist += self.children[identifier]
         continue
       # Check soundness
       if identifier != spec['id']:
         self.logger.logdebug( 'Identifier miss-match {0} != {1}'.format(identifier, spec['id']) )
-        blacklist += children
+        blacklist += self.children[identifier]
         continue
       # Skip blacklisted nodes
       if identifier in blacklist:
         self.logger.logdebug( 'Skiping blacklisted node {0}:{1}'.format(spec['title'], identifier) )
-        blacklist += children
+        blacklist += self.children[identifier]
         continue
       # Get node class and initialize it
       nodeclass = self._get_node_class(spec['name'])
       if nodeclass is None:
         self.logger.logdebug( 'Node {0}:{1} has unknown node class: {2}'.format(spec['title'], identifier, spec['name']) )
-        blacklist += children
+        blacklist += self.children[identifier]
         continue
       if behave.core.Action not in inspect.getmro(nodeclass):
         self.logger.logdebug( 'Node {0}:{1} has invalid node class: {2}'.format(spec['title'], identifier, spec['name']) )
         self.logger.logdebug( 'It must inherit from any of these: (Action, Composite, Decorator)' )
-        blacklist += children
+        blacklist += self.children[identifier]
         continue
       nodes[identifier] = nodeclass(identifier, label=spec['title'], properties=spec['properties'])
       # Populate the graph
-      if not children:
-        graph.add_node(identifier)
-      for child in children:
+      for child in self.children[identifier]:
         graph.add_edge(identifier, child)
-      # Store node details in the nx.Graph as well
-      graph.node[identifier] = spec['properties']
-      graph.node[identifier]['children'] = list(children)
-      graph.node[identifier]['class'] = nodes[identifier].name
-      graph.node[identifier]['category'] = nodes[identifier].category
-      graph.node[identifier]['label'] = nodes[identifier].label
     if len(graph) == 0:
       self.logger.logdebug( 'Failed parsing dict. Empty graph' )
       return False
     if not nx.is_tree(graph):
       self.logger.logdebug( 'Failed parsing dict. Graph must be a tree' )
       return False
-    # Add the children for the nodes that were created
     for identifier in nodes.keys():
-      for child_id in graph.node[identifier]['children']:
+      # Add the children for the nodes that were created
+      for child_id in self.children[identifier]:
         if child_id in nodes.keys():
           # Depending on the type of class we add children or specify the child
           if    behave.core.Composite in inspect.getmro( type(nodes[identifier]) ):
@@ -132,6 +124,12 @@ class BehaviorTree(Action):
           else:
             self.logger.logdebug( 'Node {0}:{1} has invalid node class: {2}'.format(spec['title'], identifier, spec['name']) )
             self.logger.logdebug( 'To have children it must inherit from any of these: (Composite, Decorator)' )
+      # Store node details in the self.graph as well
+      graph.node[identifier] = data['nodes'][identifier]['properties']
+      graph.node[identifier]['children'] = self.children[identifier]
+      graph.node[identifier]['class'] = nodes[identifier].name
+      graph.node[identifier]['category'] = nodes[identifier].category
+      graph.node[identifier]['label'] = nodes[identifier].label
     # Set-up the class
     if data.has_key('id'):
       self.identifier = data['id']

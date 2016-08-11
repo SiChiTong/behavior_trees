@@ -109,7 +109,7 @@
     "03": {
       "id": "03",
       "name": "Sequence",
-      "title": "PARENT_SEQUENCE",
+      "title": "SEQUENCE",
       "description": "",
       "properties": {},
       "display": {
