@@ -2,10 +2,14 @@
 import core
 import composites
 import decorators
-# For the creating of the behavior tree, we need the module behave to have
-# the composites and the default actions
-from composites import Selector, Sequence
-from actions import Failer, Runner, Succeeder
 
-# Alias so that we can parse files directly generated here: http://editor.behavior3.com/
+# Here we define the 'default' composites and actions.
+# These default classes will be used when parsing a behavior tree.
+from actions import Failer, Runner, Succeeder, Wait
+from composites import Selector, Sequence
+from decorators import Limiter, Repeater
+
+
+# Aliases for compatibility with the online editor: http://editor.behavior3.com/
 Priority = Selector
+Error = Failer
