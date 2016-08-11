@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package>
+  <name>behave_viewer</name>
+  <version>0.1.0</version>
+  <description>The behave_viewer package</description>
+  
+  <maintainer email="fsuarez.ruiz@pmail.ntu.edu.sg">Francisco Suarez Ruiz</maintainer>
+  <license>BSD</license>
+  <author email="fsuarez.ruiz@pmail.ntu.edu.sg">Francisco Suarez Ruiz</author>
+  <url type="website">https://github.com/fsuarez6/behavior_trees</url>
+  <url type="bugtracker">https://github.com/fsuarez6/behavior_trees/issues</url>
+  <url type="repository">https://github.com/fsuarez6/behavior_trees</url>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <run_depend>python-matplotlib</run_depend>
+  <run_depend>rqt_gui</run_depend>
+  
+  <export>
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
+  </export>
+</package>
