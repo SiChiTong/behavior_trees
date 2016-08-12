@@ -1,7 +1,7 @@
 <library path="src">
-  <class name="BehaveViewer" type="behave_viewer.rqt.BehaveViewer" base_class_type="rqt_gui_py::Plugin">
+  <class name="DotMatViewer" type="behave_viewer.dotmat.DotMatViewer" base_class_type="rqt_gui_py::Plugin">
     <description>
-      Viewer for the behavior_trees metapackage
+      Viewer for the behavior_trees metapackage using matplotlib
     </description>
     <qtgui>
       <group>
@@ -9,9 +9,9 @@
         <icon type="theme">folder</icon>
         <statustip>Plugins related to visualization.</statustip>
       </group>
-      <label>Behavior Tree</label>
-      <icon type="theme">preferences-system-network</icon>
-      <statustip>A Python GUI plugin for visualizing Behavior Trees</statustip>
+      <label>DotMatViewer</label>
+      <icon type="theme">applications-graphics</icon>
+      <statustip>A Python GUI plugin for visualizing DOT graphs using matplotlib</statustip>
     </qtgui>
   </class>
 </library>

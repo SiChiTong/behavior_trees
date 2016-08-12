@@ -6,6 +6,7 @@ import inspect
 import importlib
 import collections
 import networkx as nx
+from networkx.readwrite import json_graph
 # Logger
 from criros.utils import TextColors
 
@@ -20,11 +21,18 @@ class ActionState(object):
 
 
 class Action(object):
-  def __init__(self, identifier, label, properties):
+  def __init__(self, identifier, title, properties):
     self.category = 'Action'
     self.identifier = identifier
-    self.label = label
+    self.title = title
     self.properties = collections.defaultdict(lambda:None, properties)
+  
+  @property
+  def label(self): 
+    """
+    The label is composed by (shape, text)
+    """
+    return ('box', self.title)
   
   @property
   def name(self): 
@@ -36,10 +44,11 @@ class Action(object):
 
 
 class BehaviorTree(Action):
-  def __init__(self, identifier=None, label='BEHAVIOR_TREE', properties={}, logger=TextColors()):
+  def __init__(self, identifier=None, title='BEHAVIOR_TREE', properties={}, logger=TextColors()):
     identifier = identifier or str(uuid.uuid1())
-    super(BehaviorTree, self).__init__(identifier, label, properties=properties)
+    super(BehaviorTree, self).__init__(identifier, title, properties=properties)
     self.category = 'BehaviorTree'
+    self.title = title
     self.graph = nx.DiGraph()
     self.logger = logger
     self.nodes = dict()
@@ -102,7 +111,7 @@ class BehaviorTree(Action):
         self.logger.logdebug( 'It must inherit from any of these: (Action, Composite, Decorator)' )
         blacklist += self.children[identifier]
         continue
-      nodes[identifier] = nodeclass(identifier, label=spec['title'], properties=spec['properties'])
+      nodes[identifier] = nodeclass(identifier, title=spec['title'], properties=spec['properties'])
       # Populate the graph
       for child in self.children[identifier]:
         graph.add_edge(identifier, child)
@@ -129,7 +138,10 @@ class BehaviorTree(Action):
       graph.node[identifier]['children'] = self.children[identifier]
       graph.node[identifier]['class'] = nodes[identifier].name
       graph.node[identifier]['category'] = nodes[identifier].category
-      graph.node[identifier]['label'] = nodes[identifier].label
+      graph.node[identifier]['title'] = nodes[identifier].title
+      shape,label = nodes[identifier].label
+      graph.node[identifier]['label'] = label
+      graph.node[identifier]['shape'] = shape
     # Set-up the class
     if data.has_key('id'):
       self.identifier = data['id']
@@ -149,8 +161,8 @@ class BehaviorTree(Action):
 
 
 class Composite(Action):
-  def __init__(self, identifier, label, properties={}):
-    super(Composite, self).__init__(identifier, label, properties=properties)
+  def __init__(self, identifier, title, properties={}):
+    super(Composite, self).__init__(identifier, title, properties=properties)
     self.category = 'Composite'
     self.children = []
   
@@ -173,10 +185,18 @@ class Composite(Action):
 
 
 class Decorator(Action):
-  def __init__(self, identifier, label, properties={}):
-    super(Decorator, self).__init__(identifier, label, properties=properties)
+  def __init__(self, identifier, title, properties={}):
+    super(Decorator, self).__init__(identifier, title, properties=properties)
     self.category = 'Decorator'
     self.child = None
+  
+  @property
+  def label(self): 
+    """
+    The label is composed by (shape, text).
+    The shape for a decorator is a diamond.
+    """
+    return ('diamond', self.title)
   
   def set_child(self, child):
     self.child = child

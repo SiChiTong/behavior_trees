@@ -1,10 +1,10 @@
 #! /usr/bin/env python
-from core import ActionState, Decorator
+from .core import ActionState, Decorator
 
 
 class Limiter(Decorator):
-  def __init__(self, identifier, label, properties={}):
-    super(Limiter, self).__init__(identifier, label, properties=properties)
+  def __init__(self, identifier, title, properties={}):
+    super(Limiter, self).__init__(identifier, title, properties=properties)
     self.iterations = int(self.properties['maxLoop'] or 1)
     self.ticks = 0
   
@@ -23,8 +23,8 @@ class Repeater(Decorator):
   child returns a SUCCESS or FAILURE value, or when this decorator receives 
   the tick. Additionally, a maximum number of repetition can be provided.
   """
-  def __init__(self, identifier, label, properties={}):
-    super(Repeater, self).__init__(identifier, label, properties=properties)
+  def __init__(self, identifier, title, properties={}):
+    super(Repeater, self).__init__(identifier, title, properties=properties)
     self.iterations = int(self.properties['maxLoop'] or 1)
     self.ticks = 0
   
