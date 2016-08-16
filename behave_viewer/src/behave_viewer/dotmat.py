@@ -16,9 +16,6 @@ from python_qt_binding.QtWidgets import QWidget, QVBoxLayout, QSizePolicy
 from rqt_plot.data_plot.mat_data_plot import FigureCanvas
 from matplotlib.figure import Figure
 
-VALID_SHAPES = {'diamond':'D', 'box':'s', 'circle':'o', 'square':'s'}
-DEFAULT_SHAPE = VALID_SHAPES['box']
-
 
 class MatPlotWidget(FigureCanvas):
   """
@@ -59,6 +56,8 @@ class DotMatViewer(Plugin):
     #~ self._args = self._parse_args(context.argv())
     self.maxrate = 10.
     self.topic = 'dotcode'
+    self.arrows = False
+    self.width = 2.0
     # Create the figure canvas and attach it to the context
     self.widget = MatPlotWidget()
     self.widget.setObjectName('DotMat')
@@ -73,41 +72,59 @@ class DotMatViewer(Plugin):
     self.last_update = rospy.Time.now()
     self.sub = rospy.Subscriber(self.topic, String, self.dot_graph_cb)
   
-  def dot_graph_cb(self, msg):
-    # Throttling to 'maxrate' the update of the widget
+  def get_valid_matshape(self, node, default='s'):
+    if not node.has_key('shape'):
+      return defautl
+    else:
+      pgvshape = node['shape']
+    # Convert shape from pygraphviz to matplotlib
+    equivalences = {'D':['diamond'], 
+                    'o':['circle'],
+                    's':['box', 'rect', 'rectangle', 'square']}
+    matshape = default
+    for key, value in equivalences.items():
+      if (pgvshape == key) or (pgvshape in value):
+        matshape = key
+        break
+    return matshape
+  
+  def dot_graph_cb(self, msg, alpha=0.3):
     if (rospy.Time.now() - self.last_update) < rospy.Duration(1.0/self.maxrate):
+      # Throttling to 'maxrate' the update of the widget
       return
     self.last_update = rospy.Time.now()
     self.widget.clear_and_hold()
     A = pgv.AGraph(msg.data)
     G = nx.nx_agraph.from_agraph(A)
     pos = nx.drawing.nx_agraph.graphviz_layout(G, prog='dot')
-    # Customize each node
+    # Draw one node at the time
     for identifier in G.nodes():
       node = G.node[identifier]
-      if node.has_key('label'):
-        label = {identifier:node['label']}
-      else:
-        label = {identifier:identifier}
-      shape = DEFAULT_SHAPE
-      if node.has_key('shape'):
-        if node['shape'] in VALID_SHAPES.keys():
-          shape = VALID_SHAPES[node['shape']]
-        elif node['shape'] in VALID_SHAPES.values():
-          shape = node['shape']
+      # Label
+      label = {identifier:node['label']} if node.has_key('label') else {identifier:identifier}
+      nx.draw_networkx_labels(G, pos, label, font_size=12, ax=self.widget.axes)
+      # Shape and color
+      shape = self.get_valid_matshape(node)
+      color = node['color'] if node.has_key('color') else 'white'
       nx.draw_networkx_nodes(G, pos, nodelist=[identifier], ax=self.widget.axes, 
-                              node_color='w', node_shape=shape)
-      nx.draw_networkx_labels(G, pos, label, font_size=11, ax=self.widget.axes)
-    nx.draw_networkx_edges(G, pos, ax=self.widget.axes)
+                              node_color=color, node_shape=shape, alpha=alpha)
+    # Draw one edge at the time
+    for edge in G.edges():
+      edge_attrs = G.edge[edge[0]][edge[1]]
+      color = edge_attrs['color'] if edge_attrs.has_key('color') else 'black'
+      nx.draw_networkx_edges(G, pos, edgelist=[edge], ax=self.widget.axes, arrows=self.arrows,
+                              edge_color=color, width=self.width, alpha=alpha)
     self.widget.refresh()
   
+  def restore_settings(self, plugin_settings, instance_settings):
+    # Nothing to be done for now
+    pass
+  
   def save_settings(self, plugin_settings, instance_settings):
+    # Nothing to be done for now
     pass
   
   def shutdown_plugin(self):
     # Unregister the subscribers to exit gracefully
     self.sub.unregister()
-  
-  def restore_settings(self, plugin_settings, instance_settings):
-    pass
 

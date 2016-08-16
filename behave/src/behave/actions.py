@@ -12,6 +12,7 @@ class Failer(Action):
   
   def tick(self):
     super(Failer, self).tick()
+    self.state = ActionState.FAILURE
     return ActionState.FAILURE
 
 
@@ -24,6 +25,7 @@ class Runner(Action):
   
   def tick(self):
     super(Runner, self).tick()
+    self.state = ActionState.RUNNING
     return ActionState.RUNNING
 
 
@@ -36,6 +38,7 @@ class Succeeder(Action):
   
   def tick(self):
     super(Succeeder, self).tick()
+    self.state = ActionState.SUCCESS
     return ActionState.SUCCESS
 
 
@@ -50,4 +53,5 @@ class Wait(Action):
   def tick(self):
     super(Wait, self).tick()
     time.sleep(self.timeout/1000.)
+    self.state = ActionState.SUCCESS
     return ActionState.SUCCESS

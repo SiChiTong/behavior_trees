@@ -18,6 +18,7 @@ class ActionState(object):
   SUCCESS = 0
   FAILURE = 1
   RUNNING = 2
+  NONE    = 3
 
 
 class Action(object):
@@ -26,17 +27,29 @@ class Action(object):
     self.identifier = identifier
     self.title = title
     self.properties = collections.defaultdict(lambda:None, properties)
+    self.state = ActionState.NONE
   
   @property
   def label(self): 
     """
-    The label is composed by (shape, text)
+    The default label for actions and decorators is the title in the JSON
+    specification
     """
-    return ('box', self.title)
+    return self.title
   
   @property
   def name(self): 
     return self.__class__.__name__
+  
+  @property
+  def shape(self): 
+    """
+    The shape for the actions is a rectangle
+    """
+    return 'rectangle'
+  
+  def get_state(self):
+    return self.state
   
   def tick(self):
     logger = TextColors()
@@ -133,15 +146,14 @@ class BehaviorTree(Action):
           else:
             self.logger.logdebug( 'Node {0}:{1} has invalid node class: {2}'.format(spec['title'], identifier, spec['name']) )
             self.logger.logdebug( 'To have children it must inherit from any of these: (Composite, Decorator)' )
-      # Store node details in the self.graph as well
+      # Store details in self.graph as well
       graph.node[identifier] = data['nodes'][identifier]['properties']
       graph.node[identifier]['children'] = self.children[identifier]
       graph.node[identifier]['class'] = nodes[identifier].name
       graph.node[identifier]['category'] = nodes[identifier].category
       graph.node[identifier]['title'] = nodes[identifier].title
-      shape,label = nodes[identifier].label
-      graph.node[identifier]['label'] = label
-      graph.node[identifier]['shape'] = shape
+      graph.node[identifier]['label'] = nodes[identifier].label
+      graph.node[identifier]['shape'] = nodes[identifier].shape
     # Set-up the class
     if data.has_key('id'):
       self.identifier = data['id']
@@ -157,7 +169,18 @@ class BehaviorTree(Action):
     rootid = self.root
     if not self.nodes.has_key(rootid):
       return ActionState.FAILURE
-    return self.nodes[rootid].tick()
+    state = self.nodes[rootid].tick()
+    self.update_graph_colors()
+    return state
+  
+  def update_graph_colors(self):
+    colors = {ActionState.SUCCESS : 'green',
+              ActionState.FAILURE : 'orange',
+              ActionState.RUNNING : 'red',
+              ActionState.NONE    : 'white'}
+    for nodeid in self.graph.nodes():
+      state = self.nodes[nodeid].get_state()
+      self.graph.node[nodeid]['color'] = colors[state]
 
 
 class Composite(Action):
@@ -191,12 +214,11 @@ class Decorator(Action):
     self.child = None
   
   @property
-  def label(self): 
+  def shape(self): 
     """
-    The label is composed by (shape, text).
-    The shape for a decorator is a diamond.
+    The shape for decorators is 'diamond'
     """
-    return ('diamond', self.title)
+    return 'diamond'
   
   def set_child(self, child):
     self.child = child

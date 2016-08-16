@@ -13,7 +13,9 @@ class Limiter(Decorator):
     if self.ticks < self.iterations:
       state = self.child.tick()
       self.ticks += 1
+      self.state = state
       return state
+    self.state = ActionState.FAILURE
     return ActionState.FAILURE
 
 
@@ -33,6 +35,8 @@ class Repeater(Decorator):
     while self.ticks < self.iterations:
       state = self.child.tick()
       if state == ActionState.RUNNING:
+        self.state = ActionState.RUNNING
         return ActionState.RUNNING
       self.ticks += 1
+    self.state = ActionState.SUCCESS
     return ActionState.SUCCESS

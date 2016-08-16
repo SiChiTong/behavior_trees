@@ -9,17 +9,18 @@ class Selector(Composite):
   @property
   def label(self): 
     """
-    The label is composed by (shape, text).
-    The text of a selector's label is '?'
+    The label for a selector is '?'
     """
-    return ('box', '?')
+    return '?'
   
   def tick(self):
     super(Selector, self).tick()
     for child in self.children:
       state = child.tick()
       if state != ActionState.FAILURE:
+        self.state = state
         return state
+    self.state = ActionState.FAILURE
     return ActionState.FAILURE
 
 
@@ -30,15 +31,16 @@ class Sequence(Composite):
   @property
   def label(self): 
     """
-    The label is composed by (shape, text).
-    The text of a sequence's label is '->'
+    The label for a selector is '->'
     """
-    return ('box', '->')
+    return '->'
   
   def tick(self):
     super(Sequence, self).tick()
     for child in self.children:
       state = child.tick()
       if state != ActionState.SUCCESS:
+        self.state = state
         return state
+    self.state = ActionState.SUCCESS
     return ActionState.SUCCESS
