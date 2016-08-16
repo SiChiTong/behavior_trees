@@ -107,7 +107,7 @@ class DotMatViewer(Plugin):
       shape = self.get_valid_matshape(node)
       color = node['color'] if node.has_key('color') else 'white'
       nx.draw_networkx_nodes(G, pos, nodelist=[identifier], ax=self.widget.axes, 
-                              node_color=color, node_shape=shape, alpha=alpha)
+                              node_color=color, node_shape=shape, node_size=500, alpha=alpha)
     # Draw one edge at the time
     for edge in G.edges():
       edge_attrs = G.edge[edge[0]][edge[1]]

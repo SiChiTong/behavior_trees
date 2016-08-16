@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+import time
 from .core import ActionState, Composite
 
 
@@ -14,8 +15,10 @@ class Selector(Composite):
     return '?'
   
   def tick(self):
+    self.state = ActionState.RUNNING
     super(Selector, self).tick()
     for child in self.children:
+      time.sleep(self.timeout)
       state = child.tick()
       if state != ActionState.FAILURE:
         self.state = state
@@ -36,8 +39,10 @@ class Sequence(Composite):
     return '->'
   
   def tick(self):
+    self.state = ActionState.RUNNING
     super(Sequence, self).tick()
     for child in self.children:
+      time.sleep(self.timeout)
       state = child.tick()
       if state != ActionState.SUCCESS:
         self.state = state

@@ -7,7 +7,7 @@ import pygraphviz as pgv
 from std_msgs.msg import String
 
 # Initialize ROS publisher
-rospy.init_node('playground')
+rospy.init_node('example_dotcode')
 pub = rospy.Publisher('/dotcode', String, queue_size=3)
 rate = rospy.Rate(0.5)
 rospy.loginfo('Publishing DOT graph to: /dotcode')

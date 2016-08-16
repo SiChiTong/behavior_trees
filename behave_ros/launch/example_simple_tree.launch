@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+  
+  <node name="execute_json_tree" pkg="behave_ros" type="execute_json_tree.py" output="screen">
+    <param name="json_tree" textfile="$(find behave)/config/example_simple_tree.json" />
+  </node>
+  
+  <node name="dotmat_viewer" pkg="behave_viewer" type="dotmat_viewer.py" output="screen"/>
+  
+</launch>

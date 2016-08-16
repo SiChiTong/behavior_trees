@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 import uuid
+import time
 import behave
 import criros
 import inspect
@@ -52,8 +53,7 @@ class Action(object):
     return self.state
   
   def tick(self):
-    logger = TextColors()
-    logger.logdebug( 'Ticked node {0}:{1} class: {2}:{3}'.format(self.label, self.identifier, self.name, self.category) )
+    pass
 
 
 class BehaviorTree(Action):
@@ -162,6 +162,10 @@ class BehaviorTree(Action):
     self.nodes = nodes
     return True
   
+  def generate_dot(self):
+    A = nx.nx_agraph.to_agraph(self.graph)
+    return A.to_string()
+  
   def tick(self):
     super(BehaviorTree, self).tick()
     if self.root is None:
@@ -170,7 +174,6 @@ class BehaviorTree(Action):
     if not self.nodes.has_key(rootid):
       return ActionState.FAILURE
     state = self.nodes[rootid].tick()
-    self.update_graph_colors()
     return state
   
   def update_graph_colors(self):
@@ -188,6 +191,7 @@ class Composite(Action):
     super(Composite, self).__init__(identifier, title, properties=properties)
     self.category = 'Composite'
     self.children = []
+    self.timeout = self.properties['timeout'] or 0.001
   
   def get_children_identifiers(self):
     return [child.identifier for child in self.children]
@@ -212,6 +216,7 @@ class Decorator(Action):
     super(Decorator, self).__init__(identifier, title, properties=properties)
     self.category = 'Decorator'
     self.child = None
+    self.timeout = self.properties['timeout'] or 0.001
   
   @property
   def shape(self): 
@@ -225,17 +230,3 @@ class Decorator(Action):
   
   def tick(self):
     super(Decorator, self).tick()
-
-
-if __name__ == '__main__':
-  import anyjson
-  import rospkg
-  rospack = rospkg.RosPack()
-  json_path  = rospack.get_path('behave') + '/config/simple_example.json'
-  with open(json_path, 'r') as f:
-    data = anyjson.deserialize(f.read())
-  btree = BehaviorTree()
-  btree.from_dict(data)
-  state = ActionState.RUNNING
-  #~ while state == ActionState.RUNNING:
-    #~ state = btree.tick()

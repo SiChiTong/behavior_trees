@@ -3,7 +3,9 @@
   "title": "BEHAVIOR_TREE",
   "description": "",
   "root": "01",
-  "properties": {},
+  "properties": {
+    "timeout": 2
+  },
   "nodes": {
     "10": {
       "id": "10",
@@ -22,7 +24,7 @@
       "title": "WAIT",
       "description": "",
       "properties": {
-        "milliseconds": 10
+        "milliseconds": 1000
       },
       "display": {
         "x": 240,
@@ -34,7 +36,9 @@
       "name": "Sequence",
       "title": "PARENT_SEQUENCE",
       "description": "",
-      "properties": {},
+      "properties": {
+        "timeout": 0.5
+      },
       "display": {
         "x": -180,
         "y": 24
@@ -71,7 +75,9 @@
       "name": "Failer",
       "title": "FAILER",
       "description": "",
-      "properties": {},
+      "properties": {
+        "timeout": 0.5
+      },
       "display": {
         "x": 240,
         "y": -228
@@ -93,7 +99,9 @@
       "name": "Priority",
       "title": "SELECTOR",
       "description": "",
-      "properties": {},
+      "properties": {
+        "timeout": 0.5
+      },
       "display": {
         "x": 24,
         "y": -132
@@ -111,7 +119,9 @@
       "name": "Sequence",
       "title": "SEQUENCE",
       "description": "",
-      "properties": {},
+      "properties": {
+        "timeout": 0.5
+      },
       "display": {
         "x": 24,
         "y": 168
@@ -138,7 +148,8 @@
       "title": "LIMIT_4X",
       "description": "",
       "properties": {
-        "maxLoop": 4
+        "maxLoop": 4,
+        "timeout": 0.5
       },
       "display": {
         "x": 240,

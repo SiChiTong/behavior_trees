@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+import time
 from .core import ActionState, Decorator
 
 
@@ -33,6 +34,7 @@ class Repeater(Decorator):
   def tick(self):
     super(Repeater, self).tick()
     while self.ticks < self.iterations:
+      time.sleep(self.timeout)
       state = self.child.tick()
       if state == ActionState.RUNNING:
         self.state = ActionState.RUNNING
