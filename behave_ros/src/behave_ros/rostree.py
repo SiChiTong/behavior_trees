@@ -7,7 +7,7 @@ from behave.core import BehaviorTree
 class RosBehaviorTree(BehaviorTree):
   def __init__(self, identifier=None, title='BEHAVIOR_TREE', properties={}):
     super(RosBehaviorTree, self).__init__(identifier, title, properties=properties, logger=rospy)
-    dotcode_rate = rospy.get_param('~dotcode_rate', 10.)
+    dotcode_rate = rospy.get_param('~dotcode_rate', 5)
     self.dotcode_pub = rospy.Publisher('dotcode', String, queue_size=3)
     self.dotcode_timer = rospy.Timer(rospy.Duration(1.0/dotcode_rate), self.cb_publish_dotcode)
     ns = rospy.get_namespace()

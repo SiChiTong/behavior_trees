@@ -49,18 +49,18 @@ class MatPlotWidget(FigureCanvas):
     self.figure.tight_layout()
 
 class DotMatViewer(Plugin):
+  PLUGIN_TITLE = 'Behave Viewer'
   def __init__(self, context):
     super(DotMatViewer, self).__init__(context)
-    self.setObjectName('DotMatViewer')
     self.context = context
-    #~ self._args = self._parse_args(context.argv())
-    self.maxrate = 10.
+    self.maxrate = 10
     self.topic = 'dotcode'
     self.arrows = False
     self.width = 2.0
     # Create the figure canvas and attach it to the context
     self.widget = MatPlotWidget()
-    self.widget.setObjectName('DotMat')
+    self.widget.setObjectName(self.PLUGIN_TITLE)
+    self.widget.setWindowTitle(self.PLUGIN_TITLE)
     if context.serial_number() > 1:
       self.widget.setWindowTitle(self.widget.windowTitle() + (' (%d)' % context.serial_number()))
     context.add_widget(self.widget)
@@ -69,7 +69,7 @@ class DotMatViewer(Plugin):
     palette.setColor(QPalette.Background, Qt.white)
     self.widget.setPalette(palette)
     # Subscribe to the specified topic
-    self.last_update = rospy.Time.now()
+    self.last_update = rospy.get_time()
     self.sub = rospy.Subscriber(self.topic, String, self.dot_graph_cb)
   
   def get_valid_matshape(self, node, default='s'):
@@ -89,10 +89,10 @@ class DotMatViewer(Plugin):
     return matshape
   
   def dot_graph_cb(self, msg, alpha=0.3):
-    if (rospy.Time.now() - self.last_update) < rospy.Duration(1.0/self.maxrate):
+    if (rospy.get_time() - self.last_update) < (1.0/self.maxrate) or rospy.is_shutdown():
       # Throttling to 'maxrate' the update of the widget
       return
-    self.last_update = rospy.Time.now()
+    self.last_update = rospy.get_time()
     self.widget.clear_and_hold()
     A = pgv.AGraph(msg.data)
     G = nx.nx_agraph.from_agraph(A)

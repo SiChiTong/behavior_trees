@@ -9,7 +9,7 @@
         <icon type="theme">folder</icon>
         <statustip>Plugins related to visualization.</statustip>
       </group>
-      <label>DotMatViewer</label>
+      <label>Behave Viewer</label>
       <icon type="theme">applications-graphics</icon>
       <statustip>A Python GUI plugin for visualizing DOT graphs using matplotlib</statustip>
     </qtgui>
