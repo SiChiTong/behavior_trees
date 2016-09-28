@@ -12,6 +12,22 @@ from networkx.readwrite import json_graph
 from criros.utils import TextColors
 
 
+def get_class_from_str(class_str):
+    split = class_str.rsplit('.', 1)
+    if len(split) == 1:
+      module = behave
+      classname = split[0]
+    else:
+      try:
+         module = importlib.import_module(split[0])
+         classname = split[1]
+      except ImportError:
+        return None
+    if not hasattr(module, classname):
+      return None
+    return getattr(module, classname)
+
+
 class ActionState(object):
   """
   A class for enumerating possible state of the Actions
@@ -67,21 +83,6 @@ class BehaviorTree(Action):
     self.nodes = dict()
     self.children = collections.defaultdict(list)
   
-  def _get_node_class(self, name):
-    split = name.rsplit('.', 1)
-    if len(split) == 1:
-      module = behave
-      classname = split[0]
-    else:
-      try:
-         module = importlib.import_module(split[0])
-         classname = split[1]
-      except ImportError:
-        return None
-    if not hasattr(module, classname):
-      return None
-    return getattr(module, classname)
-  
   def from_dict(self, data):
     # Check that the dict has the expected keys
     if not criros.utils.has_keys(data, ['nodes','properties','root','title']):
@@ -114,7 +115,7 @@ class BehaviorTree(Action):
         blacklist += self.children[identifier]
         continue
       # Get node class and initialize it
-      nodeclass = self._get_node_class(spec['name'])
+      nodeclass = get_class_from_str(spec['name'])
       if nodeclass is None:
         self.logger.logdebug( 'Node {0}:{1} has unknown node class: {2}'.format(spec['title'], identifier, spec['name']) )
         blacklist += self.children[identifier]
