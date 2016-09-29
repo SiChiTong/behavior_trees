@@ -15,6 +15,7 @@
   
   <run_depend>python-matplotlib</run_depend>
   <run_depend>python-pygraphviz</run_depend>
+  <run_depend>rosbridge_server</run_depend>
   <run_depend>rqt_gui</run_depend>
   
   <export>
