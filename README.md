@@ -1,2 +1,4 @@
 # behave
-ROS package for Behavior Trees. Writen in Python
+ROS package for Behavior Trees. Written in Python
+
+Generate new tasks using this online editor: <http://editor.behavior3.com/>

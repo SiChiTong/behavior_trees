@@ -3,6 +3,20 @@ import time
 from .core import ActionState, Decorator
 
 
+class IgnoreFailure(Decorator):
+  def __init__(self, identifier, title, properties={}):
+    super(IgnoreFailure, self).__init__(identifier, title, properties=properties)
+  
+  def tick(self):
+    self.state = ActionState.RUNNING
+    super(IgnoreFailure, self).tick()
+    state = self.child.tick()
+    if state == ActionState.FAILURE:
+      state == ActionState.SUCCESS
+    self.state = state
+    return state
+
+
 class Limiter(Decorator):
   def __init__(self, identifier, title, properties={}):
     super(Limiter, self).__init__(identifier, title, properties=properties)

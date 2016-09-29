@@ -7,7 +7,7 @@ import decorators
 # These default classes will be used when parsing a behavior tree.
 from actions import Failer, Runner, Succeeder, Wait
 from composites import Selector, Sequence
-from decorators import Limiter, Repeater
+from decorators import IgnoreFailure, Limiter, Repeater
 
 
 # Aliases for compatibility with the online editor: http://editor.behavior3.com/
