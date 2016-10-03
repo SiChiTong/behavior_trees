@@ -84,12 +84,12 @@
     // -----------------
     var listener = new ROSLIB.Topic({
       ros : ros,
-      name : '/dotcode',
+      name : '/behave/json_tree',
       messageType : 'std_msgs/String'
     });
     
     var width = 960,
-          height = 500;
+        height = 500;
     
     var tree = d3.layout.tree()
         .size([height, width - 160]);
@@ -98,34 +98,35 @@
         .projection(function(d) { return [d.y, d.x]; });
     
     var svg = d3.select("body").append("svg")
-          .attr("width", width)
-          .attr("height", height)
-          .append("g")
-          .attr("transform", "translate(40,0)");
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", "translate(40,0)");
     
-    var dotcode = '{}';
+    var tree_data = '{}';
     var link = svg.selectAll("path.link")
     var node = svg.selectAll("g.node")
     
     function update_tree() {
-      var json = JSON.parse(dotcode);
+      var json = JSON.parse(tree_data);
       
       var nodes = tree.nodes(json),
           links = tree.links(nodes);
       
-      link.remove()
+      link.remove();
+      node.remove();
+      
       link = svg.selectAll("path.link")
           .data(links)
           .enter().append("path")
           .attr("class", "link")
           .attr("d", diagonal);
       
-      node.remove();
       node = svg.selectAll("g.node")
           .data(nodes)
           .enter().append("g")
           .attr("class", "node")
-          .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
+          .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
       
       node.append("circle")
           .attr("r", 4.5);
@@ -142,7 +143,7 @@
     // Then we add a callback to be called every time a message is published on this topic.
     listener.subscribe(function(message) {
       console.log('Received message on ' + listener.name);
-      dotcode = message.data;
+      tree_data = message.data;
       update_tree();
     });
     
