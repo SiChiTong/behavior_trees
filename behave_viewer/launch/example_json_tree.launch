@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- node that publishes trees -->
+  <node name="example_json_tree" pkg="behave_viewer" type="example_json_tree.py" output="screen"/>
+  <!-- rosbridge for the d3js viewer -->
+  <include file="$(find rosbridge_server )/launch/rosbridge_websocket.launch" />
+  <!-- d3js web-based viewer -->
+  <node name="d3js_viewer" pkg="behave_viewer" type="d3js_viewer.py" output="screen"/>
+</launch>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<script src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+<script src="http://cdn.robotwebtools.org/roslibjs/current/roslib.js"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<style> /* set the CSS */
+.node text { 
+  font-family: Consolas, monaco, "Lucida Console", monospace;
+  font-weight: bold;
+  font-size: 12px; }
+
+.node--internal text {
+  text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 2px;
+}
+</style>
+
+</head>
+<body>
+  <script type="text/javascript">
+    // Connecting to ROS
+    // -----------------
+    var ros = new ROSLIB.Ros();
+    
+    // If there is an error on the backend, an 'error' emit will be emitted.
+    ros.on('error', function(error) {
+      document.getElementById('connecting').style.display = 'none';
+      document.getElementById('connected').style.display = 'none';
+      document.getElementById('closed').style.display = 'none';
+      document.getElementById('error').style.display = 'inline';
+      console.log(error);
+    });
+    
+    // Find out exactly when we made a connection.
+    ros.on('connection', function() {
+      console.log('Connection made!');
+      document.getElementById('connecting').style.display = 'none';
+      document.getElementById('error').style.display = 'none';
+      document.getElementById('closed').style.display = 'none';
+      document.getElementById('connected').style.display = 'inline';
+    });
+    
+    ros.on('close', function() {
+      console.log('Connection closed.');
+      document.getElementById('connecting').style.display = 'none';
+      document.getElementById('connected').style.display = 'none';
+      document.getElementById('closed').style.display = 'inline';
+    });
+    
+    // Create a connection to the rosbridge WebSocket server.
+    ros.connect('ws://localhost:9090');
+    
+    //Subscribe to dotcode topic
+    // -----------------
+    var listener = new ROSLIB.Topic({
+      ros : ros,
+      name : '/behave/json_tree',
+      messageType : 'std_msgs/String'
+    });
+    
+    // set the dimensions and margins of the diagram
+    var margin = {top: 20, right: 150, bottom: 30, left: 150},
+        width = 660 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+    
+    var treemap = d3.tree()
+        .size([height, width]);
+    
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom),
+      g = svg.append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+    
+    var tree_data = "";
+    var link = g.selectAll(".link")
+    var node = g.selectAll(".node")
+    
+    function draw_tree() {
+      var json = JSON.parse(tree_data);
+      
+      //  assigns the data to a hierarchy using parent-child relationships
+      var nodes = d3.hierarchy(json, function(d) {
+          return d.children;  });
+      
+      // maps the node data to the tree layout
+      treemap(nodes);
+      
+      // Clean the diagram
+      link.remove();
+      node.remove();
+      
+      function opacity(color) { 
+        if (color == "red") { return 1.0; } 
+        else { return 0.5;}
+      }
+      
+      // adds the links between the nodes
+      link = g.selectAll(".link")
+          .data( nodes.descendants().slice(1))
+        .enter().append("path")
+          .attr("class", "link")
+          .style("stroke", function(d) { return d.data.color; })
+          .style("opacity", function(d) { return opacity(d.data.color); })
+          .attr("d", function(d) {
+             return "M" + d.y + "," + d.x
+               + "C" + (d.y + d.parent.y) / 2 + "," + d.x
+               + " " + (d.y + d.parent.y) / 2 + "," + d.parent.x
+               + " " + d.parent.y + "," + d.parent.x;
+             });
+      
+      // adds each node as a group
+      node = g.selectAll(".node")
+          .data(nodes.descendants())
+        .enter().append("g")
+          .attr("class", function(d) { 
+            return "node" + 
+              (d.children ? " node--internal" : " node--leaf"); })
+          .attr("transform", function(d) { 
+            return "translate(" + d.y + "," + d.x + ")"; });
+      
+      // adds symbols as nodes
+      node.append("path")
+        .style("stroke", function(d) { return d.data.color; })
+        .style("fill", function(d) { return d.data.color; })
+        .style("opacity", function(d) { return opacity(d.data.color); })
+        .attr("d", d3.symbol()
+          .size(120)
+          .type(function(d) { if
+            (d.data.shape == "circle") { return d3.symbolCircle; } else if
+            (d.data.shape == "diamond") { return d3.symbolDiamond;} else if
+            (d.data.shape == "square") { return d3.symbolSquare;} else
+            { return d3.symbolCross;}
+            }));
+      
+      // Add node label
+      node.append("text")
+        .attr("x", function(d) { return d.children ? 0 : 8; })
+        .attr("y", function(d) { return d.children ?  -12 : 4; })
+        .style("text-anchor", function(d) { return d.children ? "middle" : "start"; })
+        .style("fill", function(d) { return d.data.color; })
+        .style("opacity", function(d) { return opacity(d.data.color); })
+        .text(function(d) { return d.data.label; });
+    };
+    
+    // Then we add a callback to be called every time a message is published on this topic.
+    listener.subscribe(function(message) {
+      console.log('Received message on ' + listener.name);
+      tree_data = message.data;
+      draw_tree();
+    });
+  </script>
+  
+  <!-- Report ROS connection status -->
+  <div id="statusIndicator">
+    <p id="connecting">
+      Connecting to rosbridge...
+    </p>
+    <p id="connected" style="color:#00D600; display:none">
+      Connected
+    </p>
+    <p id="error" style="color:#FF0000; display:none">
+      Error in the backend!
+    </p>
+    <p id="closed" style="display:none">
+      Connection closed.
+    </p>
+  </div>
+</body>
+</html>

@@ -3,6 +3,7 @@ import uuid
 import time
 import behave
 import criros
+import anyjson
 import inspect
 import importlib
 import collections
@@ -63,7 +64,7 @@ class Action(object):
     """
     The shape for the actions is a rectangle
     """
-    return 'rectangle'
+    return 'square'
   
   def get_state(self):
     return self.state
@@ -82,6 +83,7 @@ class BehaviorTree(Action):
     self.logger = logger
     self.nodes = dict()
     self.children = collections.defaultdict(list)
+    self.initialized = False
   
   def from_dict(self, data):
     # Check that the dict has the expected keys
@@ -161,11 +163,34 @@ class BehaviorTree(Action):
     self.root = data['root']
     self.graph = graph
     self.nodes = nodes
+    self.initialized = True
     return True
   
   def generate_dot(self):
     A = nx.nx_agraph.to_agraph(self.graph)
     return A.to_string()
+  
+  def generate_tree_data(self):
+    """ 
+    It seems like networkx does not maintain transversal order. So, we need generate the tree manually.
+    """
+    ## Recursive function to generate node data
+    def generate_node_data(nodeid):
+      node_dict = dict()
+      node_dict['label'] = self.graph.node[nodeid]['label']
+      node_dict['shape'] = self.graph.node[nodeid]['shape']
+      node_dict['color'] = self.graph.node[nodeid]['color']
+      if nodeid in self.children.keys():
+        node_dict['children'] = []
+        for child in self.children[nodeid]:
+          node_dict['children'].append( generate_node_data(child) )
+      return node_dict
+    ## End of recursive function
+    json_dict = generate_node_data(self.root)
+    return anyjson.dumps(json_dict)
+  
+  def is_initialized(self):
+    return self.initialized
   
   def tick(self):
     super(BehaviorTree, self).tick()
@@ -181,7 +206,7 @@ class BehaviorTree(Action):
     colors = {ActionState.SUCCESS : 'green',
               ActionState.FAILURE : 'orange',
               ActionState.RUNNING : 'red',
-              ActionState.NONE    : 'white'}
+              ActionState.NONE    : 'bluesteel'}
     for nodeid in self.graph.nodes():
       state = self.nodes[nodeid].get_state()
       self.graph.node[nodeid]['color'] = colors[state]

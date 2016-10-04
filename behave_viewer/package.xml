@@ -17,6 +17,7 @@
   <run_depend>python-pygraphviz</run_depend>
   <run_depend>rosbridge_server</run_depend>
   <run_depend>rqt_gui</run_depend>
+  <run_depend>rqt_web</run_depend>
   
   <export>
     <rqt_gui plugin="${prefix}/plugin.xml"/>

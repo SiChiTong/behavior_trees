@@ -9,9 +9,24 @@
         <icon type="theme">folder</icon>
         <statustip>Plugins related to visualization.</statustip>
       </group>
-      <label>Behave Viewer</label>
+      <label>Behave Viewer (matplotlib)</label>
       <icon type="theme">applications-graphics</icon>
       <statustip>A Python GUI plugin for visualizing DOT graphs using matplotlib</statustip>
+    </qtgui>
+  </class>
+  <class name="D3jsViewer" type="behave_viewer.web.Web" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      Viewer for the behavior_trees metapackage using D3.js
+    </description>
+    <qtgui>
+      <group>
+        <label>Visualization</label>
+        <icon type="theme">folder</icon>
+        <statustip>Plugins related to visualization.</statustip>
+      </group>
+      <label>Behave Viewer</label>
+      <icon type="theme">applications-graphics</icon>
+      <statustip>A web-based tool for visualizing trees using D3.js</statustip>
     </qtgui>
   </class>
 </library>
