@@ -8,7 +8,6 @@ class IgnoreFailure(Decorator):
     super(IgnoreFailure, self).__init__(identifier, title, properties=properties)
   
   def tick(self):
-    self.state = ActionState.RUNNING
     super(IgnoreFailure, self).tick()
     state = self.child.tick()
     if state == ActionState.FAILURE:

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- rosbridge for the d3js viewer -->
+  <include file="$(find rosbridge_server )/launch/rosbridge_websocket.launch" />
+  <!-- d3js web-based viewer -->
+  <node name="d3js_viewer" pkg="behave_viewer" type="d3js_viewer.py" output="screen"/>
+</launch>

@@ -15,7 +15,6 @@ class Selector(Composite):
     return '?'
   
   def tick(self):
-    self.state = ActionState.RUNNING
     super(Selector, self).tick()
     for child in self.children:
       time.sleep(self.timeout)
@@ -39,7 +38,6 @@ class Sequence(Composite):
     return '->'
   
   def tick(self):
-    self.state = ActionState.RUNNING
     super(Sequence, self).tick()
     for child in self.children:
       time.sleep(self.timeout)

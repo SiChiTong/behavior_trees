@@ -62,7 +62,7 @@ class Action(object):
   @property
   def shape(self): 
     """
-    The shape for the actions is a rectangle
+    The shape for the actions is a square
     """
     return 'square'
   
