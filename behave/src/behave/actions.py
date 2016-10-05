@@ -51,10 +51,21 @@ class Wait(Action):
   def __init__(self, identifier, title, properties={}):
     super(Wait, self).__init__(identifier, title, properties)
     self.milliseconds = self.properties['milliseconds'] or 10.
+    self.executed = False
+  
+  def reset(self):
+    if self.state == ActionState.RUNNING:
+      return
+    self.executed = False
+    super(Wait, self).reset()
   
   def tick(self):
-    self.state = ActionState.RUNNING
     super(Wait, self).tick()
-    time.sleep(self.milliseconds/1000.)
-    self.state = ActionState.SUCCESS
-    return ActionState.SUCCESS
+    if not self.executed:
+      self.state = ActionState.RUNNING
+      time.sleep(self.milliseconds/1000.)
+      self.state = ActionState.SUCCESS
+      self.executed = True
+      return ActionState.SUCCESS
+    else:
+      return self.state

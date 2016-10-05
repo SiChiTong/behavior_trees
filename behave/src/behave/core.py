@@ -69,6 +69,9 @@ class Action(object):
   def get_state(self):
     return self.state
   
+  def reset(self):
+    self.state = ActionState.NONE
+  
   def tick(self):
     pass
 
@@ -192,6 +195,16 @@ class BehaviorTree(Action):
   def is_initialized(self):
     return self.initialized
   
+  def reset(self):
+    rootid = self.root
+    if rootid is None:
+      return
+    state = self.nodes[rootid].tick()
+    if state == ActionState.RUNNING:
+      self.logger.logwarn('A running tree cannot be reseted')
+      return
+    self.nodes[rootid].reset()
+  
   def tick(self):
     super(BehaviorTree, self).tick()
     if self.root is None:
@@ -233,8 +246,12 @@ class Composite(Action):
       idx = children_ids.index(child.identifier)
       self.children.pop(idx)
   
-  def tick(self):
-    super(Composite, self).tick()
+  def reset(self):
+    super(Composite, self).reset()
+    if len(self.children) == 0:
+      return
+    for child in self.children:
+      child.reset()
 
 
 class Decorator(Action):
@@ -251,8 +268,11 @@ class Decorator(Action):
     """
     return 'diamond'
   
+  def reset(self):
+    super(Decorator, self).reset()
+    if self.child is None:
+      return
+    self.child.reset()
+  
   def set_child(self, child):
     self.child = child
-  
-  def tick(self):
-    super(Decorator, self).tick()

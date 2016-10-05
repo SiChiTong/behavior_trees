@@ -46,6 +46,12 @@ class RosSimpleAction(Action):
     # Flags
     self.started = False
   
+  def reset(self):
+    if self.state == ActionState.RUNNING:
+      return
+    super(RosSimpleAction, self).reset()
+    self.started = False
+  
   def tick(self):
     # Check that the server is up
     if not self.server_up:

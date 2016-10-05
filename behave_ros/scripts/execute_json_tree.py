@@ -29,4 +29,6 @@ if __name__ == '__main__':
   state = ActionState.RUNNING
   while state == ActionState.RUNNING:
     state = btree.tick()
+  rospy.sleep(2.0)
+  btree.reset()
   rospy.spin()
